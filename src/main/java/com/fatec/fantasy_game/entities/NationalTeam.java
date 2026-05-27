@@ -18,6 +18,11 @@ public class NationalTeam {
     private Long id;
     private String name;
     private String conf;
+    private Double attackScore;
+    private Double midScore;
+    private Double defenseScore;
+    private Double overallScore;
+
 
 
 

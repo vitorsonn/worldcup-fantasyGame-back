@@ -15,9 +15,9 @@ import lombok.Setter;
 @Setter
 public class FantasyTeamPlayer {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Long fantasyTeamId;
-    private Long playerId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "fantasy_team_id", nullable = false)

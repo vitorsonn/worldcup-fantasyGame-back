@@ -17,7 +17,10 @@ import java.time.LocalDateTime;
 @Table(name = "TBL_MATCH")
 public class Match {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "home_team_id", nullable = false)
     private NationalTeam homeTeam;

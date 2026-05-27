@@ -1,7 +1,6 @@
 package com.fatec.fantasy_game.entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,14 +9,16 @@ import lombok.Setter;
 import java.math.BigDecimal;
 
 
-@Entity
-@Table(name = "fantasy_teams")
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Entity
+@Table(name = "fantasy_teams")
 public class FantasyTeam {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
     private String ownerName;

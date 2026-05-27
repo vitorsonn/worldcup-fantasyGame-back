@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -15,15 +17,17 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Player {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-    private PlayerPosition positon;
+    private PlayerPosition position;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "national_team_id", nullable = false)
     private NationalTeam team;
 
-    private Double currentPrice;
+    private BigDecimal currentPrice;
 
 
 

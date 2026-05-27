@@ -1,8 +1,7 @@
 package com.fatec.fantasy_game.entities;
 
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,7 +18,9 @@ import java.util.UUID;
 @Table(name = "TBL_USER")
 public class User {
 
-    private UUID id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     private String username;
     private String email;
     private String password;

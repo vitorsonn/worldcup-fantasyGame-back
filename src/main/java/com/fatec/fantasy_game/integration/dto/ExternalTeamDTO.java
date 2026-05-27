@@ -1,4 +1,12 @@
 package com.fatec.fantasy_game.integration.dto;
 
-public record ExternalTeamDTO() {
+import java.util.List;
+
+public record ExternalTeamDTO(
+        Long id,
+        String name,
+        String tla,
+        String crest,
+        List<ExternalPlayerDTO> squad
+) {
 }

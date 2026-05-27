@@ -39,6 +39,7 @@ public class DataInitializerRunner implements CommandLineRunner {
                                 NationalTeam team = new NationalTeam();
                                 team.setName(teamDto.name());
 
+                                //gerando scores aleatórios entre 70 e 90 para ataque, meio e defesa
                                 team.setAttackScore(70 + random.nextDouble(21));
                                 team.setMidScore(70 + random.nextDouble(21));
                                 team.setDefenseScore(70 + random.nextDouble(21));
@@ -54,6 +55,8 @@ public class DataInitializerRunner implements CommandLineRunner {
 
                                         player.setPosition(translatePosition(playerDto.position()));
 
+
+                                        //preço de compra dos jogadores gerado aleatoriamente tambem para teste
                                         player.setCurrentPrice(BigDecimal.valueOf(5 + random.nextInt(16)));
 
                                         playerRepository.save(player);

@@ -36,7 +36,7 @@ public class Match {
     private LocalDateTime date;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "round_id", nullable = false)
+    @JoinColumn(name = "round_id", nullable = true)
     private Round round;
 
 

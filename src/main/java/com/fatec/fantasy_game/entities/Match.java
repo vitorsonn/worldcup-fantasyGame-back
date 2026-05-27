@@ -1,8 +1,7 @@
 package com.fatec.fantasy_game.entities;
 
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,9 +18,24 @@ import java.time.LocalDateTime;
 public class Match {
 
     private Long id;
-    private NationalTeam teamA;
-    private NationalTeam teamB;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "home_team_id", nullable = false)
+    private NationalTeam homeTeam;
+
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "away_team_id", nullable = false)
+    private NationalTeam awayTeam;
+
+    private Integer homeGoals;
+    private Integer awayGoals;
+    private MatchStatus status;
     private LocalDateTime date;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "round_id", nullable = false)
+    private Round round;
+
 
 
 }

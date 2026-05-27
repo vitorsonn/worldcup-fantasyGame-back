@@ -1,8 +1,7 @@
 package com.fatec.fantasy_game.entities;
 
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,8 +17,13 @@ import lombok.Setter;
 public class Player {
     private Long id;
     private String name;
-    private String position;
+    private PlayerPosition positon;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "national_team_id", nullable = false)
     private NationalTeam team;
+
+    private Double currentPrice;
 
 
 

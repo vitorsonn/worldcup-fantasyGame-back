@@ -6,7 +6,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 
 @Getter
@@ -21,12 +24,17 @@ public class FantasyTeam {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-    private String ownerName;
-    private Integer attack;
-    private Integer defense;
-    private Integer overall;
-    private BigDecimal bankBalance;
-    private BigDecimal teamValue;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User owner;
+
+    @OneToMany(mappedBy = "fantasyTeam", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<FantasyTeamPlayer> squad = new ArrayList<>();
+
+    private Double cash = 100.0;
+    private Double teamValue;
 
 
 

@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.math.BigDecimal;
 
 
 @AllArgsConstructor
@@ -27,7 +26,7 @@ public class Player {
     @JoinColumn(name = "national_team_id", nullable = false)
     private NationalTeam team;
 
-    private BigDecimal currentPrice;
+    private Double currentPrice;
 
 
 

@@ -1,6 +1,8 @@
 package com.fatec.fantasy_game.entities;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,6 +23,7 @@ public class FantasyTeamPlayer {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "fantasy_team_id", nullable = false)
+    @JsonIgnoreProperties("squad")
     private FantasyTeam fantasyTeam;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -30,4 +33,6 @@ public class FantasyTeamPlayer {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "round_id", nullable = false)
     private Round round;
+
+    private Double roundPoints;
 }

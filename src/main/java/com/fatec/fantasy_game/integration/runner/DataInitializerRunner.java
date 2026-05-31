@@ -71,13 +71,11 @@ public void run(String... args) throws Exception {
         System.out.println("Iniciando carga de dados da Copa do Mundo via API Externa...");
 
         try {
-            // 🌟 O .block() faz a thread esperar o JSON chegar e ser processado por completo
             var response = apiClient.getTeamData().block();
 
             if (response != null && response.teams() != null) {
                 Random random = new Random();
 
-                // Loop que popula todas as seleções e jogadores reais
                 response.teams().forEach(teamDto -> {
                     NationalTeam team = new NationalTeam();
                     team.setName(teamDto.name());
@@ -103,7 +101,6 @@ public void run(String... args) throws Exception {
                 
                 System.out.println("Carga de seleções e jogadores concluída com sucesso!");
 
-                // 3. AGENDA A PARTIDA DE TESTE (Sem risco de banco fechado!)
                 System.out.println("Agendando partidas de teste...");
                 List<NationalTeam> selecoes = nationalTeamRepository.findAll();
                 

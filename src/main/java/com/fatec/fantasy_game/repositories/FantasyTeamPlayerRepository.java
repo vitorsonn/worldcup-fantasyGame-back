@@ -8,4 +8,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface FantasyTeamPlayerRepository extends JpaRepository<FantasyTeamPlayer, Long> {
     List<FantasyTeamPlayer> findByFantasyTeamIdAndRoundId(Long fantasyTeamId, Long roundId);
+    List<FantasyTeamPlayer> findByPlayerIdAndRoundId(Long playerId, Long roundId);
 }

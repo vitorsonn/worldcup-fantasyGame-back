@@ -67,4 +67,9 @@ public class SimulationController {
 
     }
 
+    @GetMapping("/results")
+    public List<Match>getRoundResults(@RequestParam Long roundId){
+        return matchRepository.findByRoundId(roundId);
+    }
+
 }

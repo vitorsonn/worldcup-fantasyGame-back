@@ -1,18 +1,27 @@
 package com.fatec.fantasy_game.simulation.controller;
 
 import com.fatec.fantasy_game.entities.FantasyTeamPlayer;
+import com.fatec.fantasy_game.entities.Player;
+import com.fatec.fantasy_game.repositories.FantasyTeamPlayerRepository;
+import com.fatec.fantasy_game.repositories.PlayerRepository;
 import com.fatec.fantasy_game.simulation.service.MarketService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/market")
 public class MarketController {
 
     private final MarketService marketService;
+    private final PlayerRepository playerRepository;
+    private final FantasyTeamPlayerRepository fantasyTeamPlayerRepository;
 
-    public MarketController(MarketService marketService) {
+    public MarketController(MarketService marketService, PlayerRepository playerRepository, FantasyTeamPlayerRepository fantasyTeamPlayerRepository) {
         this.marketService = marketService;
+        this.playerRepository = playerRepository;
+        this.fantasyTeamPlayerRepository = fantasyTeamPlayerRepository;
     }
 
     @PostMapping("/buy")
@@ -26,5 +35,16 @@ public class MarketController {
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+
+    @GetMapping("/players")
+    public List<Player> getAllPlayers(){
+        return playerRepository.findAll();
+    }
+
+    @GetMapping
+    public List<FantasyTeamPlayer> getMySquad(@PathVariable Long teamId){
+        return fantasyTeamPlayerRepository.findByFantasyTeamId(teamId);
     }
 }

@@ -8,6 +8,9 @@ import com.fatec.fantasy_game.repositories.NationalTeamRepository;
 import com.fatec.fantasy_game.simulation.service.MatchSimulatorService;
 import com.fatec.fantasy_game.simulation.service.ScoringService;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
@@ -29,6 +32,12 @@ public class SimulationController {
     private final ScoringService scoringService;
     private final MatchRepository matchRepository;
 
+    @PersistenceContext
+    private EntityManager entityManager;
+
+
+
+
 
     @GetMapping("/quick-match")
     public ResponseEntity<?> simulateQuickMatch(@RequestParam Long homeId, @RequestParam Long awayId){
@@ -49,6 +58,8 @@ public class SimulationController {
 
     }
 
+
+    @Transactional
     @PostMapping("/simulate-round")
     public ResponseEntity<String>simulateRound(@RequestParam Long roundId){
         List<Match> matches = matchRepository.findByRoundId(roundId);
@@ -62,6 +73,9 @@ public class SimulationController {
         }
 
         scoringService.calculateRoundScores(roundId);
+
+        entityManager.flush();
+        entityManager.clear();
 
         return ResponseEntity.ok("Rodada " + roundId + " simulada e pontuações distribuídas com sucesso!");
 

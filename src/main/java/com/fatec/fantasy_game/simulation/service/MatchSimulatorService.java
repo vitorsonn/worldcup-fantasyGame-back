@@ -30,6 +30,14 @@ public class MatchSimulatorService {
     }
 
     public Match simulateMatch(Match match) {
+        matchEventRepository.deleteByMatchId(match.getId());
+
+        if (match.getEvents() != null) {
+            match.getEvents().clear();
+        }
+
+
+
         NationalTeam home = match.getHomeTeam();
         NationalTeam away = match.getAwayTeam();
 

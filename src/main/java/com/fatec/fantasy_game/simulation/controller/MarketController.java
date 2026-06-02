@@ -1,10 +1,9 @@
 package com.fatec.fantasy_game.simulation.controller;
 
 import com.fatec.fantasy_game.entities.FantasyTeamPlayer;
+import com.fatec.fantasy_game.entities.Match;
 import com.fatec.fantasy_game.entities.Player;
-import com.fatec.fantasy_game.repositories.FantasyTeamPlayerRepository;
-import com.fatec.fantasy_game.repositories.FantasyTeamRepository;
-import com.fatec.fantasy_game.repositories.PlayerRepository;
+import com.fatec.fantasy_game.repositories.*;
 import com.fatec.fantasy_game.simulation.service.MarketService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,12 +18,15 @@ public class MarketController {
     private final PlayerRepository playerRepository;
     private final FantasyTeamPlayerRepository fantasyTeamPlayerRepository;
     private final FantasyTeamRepository fantasyTeamRepository;
+    private final MatchRepository matchRepository;
 
-    public MarketController(MarketService marketService, PlayerRepository playerRepository, FantasyTeamPlayerRepository fantasyTeamPlayerRepository, FantasyTeamRepository fantasyTeamRepository) {
+    public MarketController(MarketService marketService, PlayerRepository playerRepository, FantasyTeamPlayerRepository fantasyTeamPlayerRepository, FantasyTeamRepository fantasyTeamRepository, MatchRepository matchRepository) {
         this.marketService = marketService;
         this.playerRepository = playerRepository;
         this.fantasyTeamPlayerRepository = fantasyTeamPlayerRepository;
         this.fantasyTeamRepository = fantasyTeamRepository;
+        this.matchRepository = matchRepository;
+
     }
 
     @PostMapping("/buy")
@@ -57,4 +59,6 @@ public class MarketController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+
+
 }

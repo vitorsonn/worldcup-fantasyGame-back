@@ -45,89 +45,113 @@ public class DataInitializerRunner implements CommandLineRunner {
         this.matchRepository = matchRepository;
     }
 
-@Override
-public void run(String... args) throws Exception {
-    // 1. CADASTRO DE TESTE ISOLADO
-    if (userRepository.count() == 0) {
-        System.out.println("Criando dados de teste do usuário e rodada...");
+    @Override
+    public void run(String... args) throws Exception {
+        if (userRepository.count() == 0) {
+            System.out.println("Criando dados de teste do usuário e rodada...");
 
-        User vitorUser = new User();
-        vitorUser.setUsername("Vitor");
-        vitorUser.setEmail("vitor@email.com");
-        User savedUser = userRepository.save(vitorUser);
+            User vitorUser = new User();
+            vitorUser.setUsername("Vitor");
+            vitorUser.setEmail("vitor@email.com");
+            User savedUser = userRepository.save(vitorUser);
 
-        FantasyTeam meuTime = new FantasyTeam();
-        meuTime.setName("Vitor FC");
-        meuTime.setOwner(savedUser);
-        meuTime.setCash(120.0);
-        fantasyTeamRepository.save(meuTime);
+            FantasyTeam meuTime = new FantasyTeam();
+            meuTime.setName("Vitor FC");
+            meuTime.setOwner(savedUser);
+            meuTime.setCash(120.0);
+            fantasyTeamRepository.save(meuTime);
 
-        Round rodada1 = new Round();
-        rodada1.setRoundNumber(1);
-        roundRepository.save(rodada1);
-    }
+            Round rodada1 = new Round();
+            rodada1.setRoundNumber(1);
+            roundRepository.save(rodada1);
+        }
 
-    if (nationalTeamRepository.count() == 0) {
-        System.out.println("Iniciando carga de dados da Copa do Mundo via API Externa...");
+        if (nationalTeamRepository.count() == 0) {
+            System.out.println("Iniciando carga de dados da Copa do Mundo via API Externa...");
 
-        try {
-            var response = apiClient.getTeamData().block();
+            try {
+                var response = apiClient.getTeamData().block();
 
-            if (response != null && response.teams() != null) {
-                Random random = new Random();
+                if (response != null && response.teams() != null) {
+                    Random random = new Random();
 
-                response.teams().forEach(teamDto -> {
-                    NationalTeam team = new NationalTeam();
-                    team.setName(teamDto.name());
-                    team.setAttackScore(70 + random.nextDouble(21));
-                    team.setMidScore(70 + random.nextDouble(21));
-                    team.setDefenseScore(70 + random.nextDouble(21));
-                    team.setOverallScore(
-                            (team.getAttackScore() + team.getMidScore() + team.getDefenseScore()) / 3);
+                    response.teams().forEach(teamDto -> {
+                        NationalTeam team = new NationalTeam();
+                        team.setName(teamDto.name());
+                        team.setAttackScore(70 + random.nextDouble(21));
+                        team.setMidScore(70 + random.nextDouble(21));
+                        team.setDefenseScore(70 + random.nextDouble(21));
+                        team.setOverallScore(
+                                (team.getAttackScore() + team.getMidScore() + team.getDefenseScore()) / 3);
 
-                    final NationalTeam savedTeam = nationalTeamRepository.save(team);
+                        final NationalTeam savedTeam = nationalTeamRepository.save(team);
 
-                    if (teamDto.squad() != null) {
-                        teamDto.squad().forEach(playerDto -> {
-                            Player player = new Player();
-                            player.setName(playerDto.name());
-                            player.setTeam(savedTeam);
-                            player.setPosition(translatePosition(playerDto.position()));
-                            player.setCurrentPrice(Double.valueOf(5 + random.nextInt(16)));
-                            playerRepository.save(player);
-                        });
+                        if (teamDto.squad() != null) {
+                            teamDto.squad().forEach(playerDto -> {
+                                Player player = new Player();
+                                player.setName(playerDto.name());
+                                player.setTeam(savedTeam);
+                                player.setPosition(translatePosition(playerDto.position()));
+                                player.setCurrentPrice(Double.valueOf(5 + random.nextInt(16)));
+                                playerRepository.save(player);
+                            });
+                        }
+                    });
+
+                    System.out.println("Carga de seleções e jogadores concluída com sucesso!");
+
+                    System.out.println("Agendando partidas de teste...");
+                    List<NationalTeam> selecoes = nationalTeamRepository.findAll();
+
+                    if (selecoes.size() >= 16) {
+
+                        for (int roundNum = 1; roundNum <= 5; roundNum++) {
+                            final int currentRoundNumber = roundNum;
+
+                            Round currentRound = roundRepository.findByRoundNumber(currentRoundNumber)
+                                    .orElseGet(() -> {
+                                        Round newRound = new Round();
+                                        newRound.setRoundNumber(currentRoundNumber);
+                                        return roundRepository.save(newRound);
+                                    });
+
+                            System.out.println("Gerando confrontos para a Rodada " + roundNum + "...");
+
+                            for (int jogo = 0; jogo < 8; jogo++) {
+                                int homeIdx = (jogo + roundNum) % selecoes.size();
+                                int awayIdx = (selecoes.size() - 1 - jogo + roundNum) % selecoes.size();
+
+                                if (homeIdx == awayIdx) {
+                                    awayIdx = (awayIdx + 1) % selecoes.size();
+                                }
+
+                                Match partida = new Match();
+                                partida.setHomeTeam(selecoes.get(homeIdx));
+                                partida.setAwayTeam(selecoes.get(awayIdx));
+                                partida.setRound(currentRound);
+                                partida.setStatus(MatchStatus.AGENDADA);
+                                partida.setHomeGoals(0);
+                                partida.setAwayGoals(0);
+
+                                matchRepository.save(partida);
+                            }
+                        }
+                        System.out.println("⚽ Calendário completo de 5 rodadas com 8 jogos cada agendado com sucesso!");
+
+                    } else {
+                        System.out.println("Aviso: É necessário ter pelo menos 16 seleções vindas da API para fechar 8 jogos por rodada.");
                     }
-                });
-                
-                System.out.println("Carga de seleções e jogadores concluída com sucesso!");
 
-                System.out.println("Agendando partidas de teste...");
-                List<NationalTeam> selecoes = nationalTeamRepository.findAll();
-                
-                Round rd1 = roundRepository.findById(1L).orElse(null);
 
-                if (rd1 != null && selecoes.size() >= 8) {
-                    Match partidaTeste = new Match();
-                    partidaTeste.setHomeTeam(selecoes.get(7));
-                    partidaTeste.setAwayTeam(selecoes.get(5));
-                    partidaTeste.setRound(rd1);
-                    partidaTeste.setStatus(MatchStatus.AGENDADA);
-                    partidaTeste.setHomeGoals(0);
-                    partidaTeste.setAwayGoals(0);
 
-                    matchRepository.save(partidaTeste);
-                    System.out.println("Partida criada com sucesso: " + selecoes.get(7).getName() + " x "
-                            + selecoes.get(5).getName());
-                } else {
-                    System.out.println("Aviso: Não há seleções suficientes no banco.");
+
                 }
+            } catch (Exception e) {
+                System.err.println("Erro ao carregar dados da API: " + e.getMessage());
+                e.printStackTrace();
             }
-        } catch (Exception e) {
-            System.err.println("Erro ao carregar dados da API: " + e.getMessage());
-            e.printStackTrace();
         }
     }
-}
 
     private PlayerPosition translatePosition(String externalPosition) {
         if (externalPosition == null)

@@ -34,6 +34,7 @@ public class Match {
 
     private Integer homeGoals;
     private Integer awayGoals;
+    @Enumerated(EnumType.STRING)
     private MatchStatus status;
     private LocalDateTime date;
 

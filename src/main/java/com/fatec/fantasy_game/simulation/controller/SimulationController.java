@@ -16,11 +16,7 @@ import lombok.RequiredArgsConstructor;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/simulation")
@@ -84,6 +80,13 @@ public class SimulationController {
     @GetMapping("/results")
     public List<Match>getRoundResults(@RequestParam Long roundId){
         return matchRepository.findByRoundId(roundId);
+    }
+
+    @GetMapping("matches/round/{roundId}")
+    public ResponseEntity<List<Match>> getMatchesByRound(@PathVariable Long roundId) {
+        List<Match> matches = matchRepository.findByRoundId(roundId);
+        return ResponseEntity.ok(matches);
+
     }
 
 }

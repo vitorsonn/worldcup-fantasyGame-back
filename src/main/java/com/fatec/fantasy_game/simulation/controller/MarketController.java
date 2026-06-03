@@ -4,7 +4,9 @@ import com.fatec.fantasy_game.entities.FantasyTeamPlayer;
 import com.fatec.fantasy_game.entities.Match;
 import com.fatec.fantasy_game.entities.Player;
 import com.fatec.fantasy_game.repositories.*;
+import com.fatec.fantasy_game.simulation.dto.SquadPlayerDTO;
 import com.fatec.fantasy_game.simulation.service.MarketService;
+import com.fatec.fantasy_game.simulation.service.ScoringService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,17 +17,19 @@ import java.util.List;
 public class MarketController {
 
     private final MarketService marketService;
+    private final ScoringService scoringService;
     private final PlayerRepository playerRepository;
     private final FantasyTeamPlayerRepository fantasyTeamPlayerRepository;
     private final FantasyTeamRepository fantasyTeamRepository;
-    private final MatchRepository matchRepository;
 
-    public MarketController(MarketService marketService, PlayerRepository playerRepository, FantasyTeamPlayerRepository fantasyTeamPlayerRepository, FantasyTeamRepository fantasyTeamRepository, MatchRepository matchRepository) {
+    public MarketController(MarketService marketService, PlayerRepository playerRepository, FantasyTeamPlayerRepository fantasyTeamPlayerRepository, FantasyTeamRepository fantasyTeamRepository, MatchRepository matchRepository, ScoringService scoringService) {
         this.marketService = marketService;
+        this.scoringService = scoringService;
         this.playerRepository = playerRepository;
         this.fantasyTeamPlayerRepository = fantasyTeamPlayerRepository;
         this.fantasyTeamRepository = fantasyTeamRepository;
-        this.matchRepository = matchRepository;
+
+
 
     }
 
@@ -49,8 +53,16 @@ public class MarketController {
     }
 
     @GetMapping("/{teamId}/roster")
-    public List<FantasyTeamPlayer> getMySquad(@PathVariable Long teamId){
-        return fantasyTeamPlayerRepository.findByFantasyTeamId(teamId);
+    public ResponseEntity<List<FantasyTeamPlayer>> getMySquad(
+            @PathVariable("teamId") Long teamId,
+            @RequestParam("roundId") Long roundId) { // 🌟 Adicionado o roundId dinâmico
+
+        System.out.println("🔍 Buscando elenco do Time ID: " + teamId + " especificamente para a Rodada ID: " + roundId);
+
+
+        List<FantasyTeamPlayer> squad = fantasyTeamPlayerRepository.findByFantasyTeamIdAndRoundId(teamId, roundId);
+
+        return ResponseEntity.ok(squad);
     }
 
     @GetMapping("/team/{teamId}")
@@ -59,6 +71,30 @@ public class MarketController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+//
+//    @GetMapping("/{teamId}/roster")
+//    public List<SquadPlayerDTO> getMySquad(@PathVariable Long teamId, @RequestParam(defaultValue = "1") Long roundId) {
+//        List<FantasyTeamPlayer> squad = fantasyTeamPlayerRepository.findByFantasyTeamId(teamId);
+//
+//        return squad.stream().map(ftp -> {
+//            Double pontosTotais = scoringService.getAccumulatedPointsOfPlayerInTeam(
+//                    teamId,
+//                    ftp.getPlayer().getId(),
+//                    roundId
+//            );
+//
+//            return new SquadPlayerDTO(
+//                    ftp.getId(),
+//                    ftp.getPlayer().getPosition().toString(),
+//                    ftp.getPlayer().getName(),
+//                    ftp.getPlayer().getCurrentPrice(),
+//                    ftp.getRoundPoints() != null ? ftp.getRoundPoints() : 0.0,
+//                    pontosTotais
+//            );
+//        }).toList();
+//    }
+
+
 
 
 }

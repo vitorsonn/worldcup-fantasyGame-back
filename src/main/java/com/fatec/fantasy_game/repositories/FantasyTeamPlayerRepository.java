@@ -10,4 +10,6 @@ public interface FantasyTeamPlayerRepository extends JpaRepository<FantasyTeamPl
     List<FantasyTeamPlayer> findByFantasyTeamIdAndRoundId(Long fantasyTeamId, Long roundId);
     List<FantasyTeamPlayer> findByPlayerIdAndRoundId(Long playerId, Long roundId);
     List<FantasyTeamPlayer> findByFantasyTeamId(Long fantasyTeamId);
+    List<FantasyTeamPlayer>findByFantasyTeamIdAndPlayerId(Long fantasyTeamId, Long playerId);
+    List<FantasyTeamPlayer>findByRoundId(Long roundId);
 }

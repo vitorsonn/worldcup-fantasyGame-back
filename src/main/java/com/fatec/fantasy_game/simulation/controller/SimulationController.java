@@ -1,10 +1,14 @@
 package com.fatec.fantasy_game.simulation.controller;
 
 
+import com.fatec.fantasy_game.entities.FantasyTeamPlayer;
 import com.fatec.fantasy_game.entities.Match;
 import com.fatec.fantasy_game.entities.NationalTeam;
+import com.fatec.fantasy_game.entities.Round;
+import com.fatec.fantasy_game.repositories.FantasyTeamPlayerRepository;
 import com.fatec.fantasy_game.repositories.MatchRepository;
 import com.fatec.fantasy_game.repositories.NationalTeamRepository;
+import com.fatec.fantasy_game.repositories.RoundRepository;
 import com.fatec.fantasy_game.simulation.service.MatchSimulatorService;
 import com.fatec.fantasy_game.simulation.service.ScoringService;
 
@@ -27,6 +31,8 @@ public class SimulationController {
     private final NationalTeamRepository nationalTeamRepository;
     private final ScoringService scoringService;
     private final MatchRepository matchRepository;
+    private final FantasyTeamPlayerRepository fantasyTeamPlayerRepository;
+    private final RoundRepository roundRepository;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -55,13 +61,35 @@ public class SimulationController {
     }
 
 
-    @Transactional
     @PostMapping("/simulate-round")
-    public ResponseEntity<String>simulateRound(@RequestParam Long roundId){
-        List<Match> matches = matchRepository.findByRoundId(roundId);
+    @Transactional
+    public ResponseEntity<String> simulateRound(@RequestParam("roundId") Long roundId) {
 
+        List<Match> matches = matchRepository.findByRoundId(roundId);
         if (matches.isEmpty()) {
             return ResponseEntity.badRequest().body("Nenhuma partida encontrada para a rodada " + roundId);
+        }
+
+        if (roundId > 1) {
+            Long previousRoundId = roundId - 1;
+            List<FantasyTeamPlayer> currentSquad = fantasyTeamPlayerRepository.findByRoundId(roundId);
+
+            if (currentSquad.isEmpty()) {
+                List<FantasyTeamPlayer> previousSquad = fantasyTeamPlayerRepository.findByRoundId(previousRoundId);
+                Round currentRound = roundRepository.findById(roundId)
+                        .orElseThrow(() -> new RuntimeException("Rodada " + roundId + " não encontrada no banco!"));
+
+                for (FantasyTeamPlayer oldContract : previousSquad) {
+                    FantasyTeamPlayer newContract = new FantasyTeamPlayer();
+                    newContract.setFantasyTeam(oldContract.getFantasyTeam());
+                    newContract.setPlayer(oldContract.getPlayer());
+                    newContract.setRound(currentRound);
+                    newContract.setRoundPoints(0.0);
+
+                    fantasyTeamPlayerRepository.save(newContract);
+                }
+                System.out.println("🔄 Elenco da Rodada " + previousRoundId + " clonado para a Rodada " + roundId);
+            }
         }
 
         for (Match match : matches) {
@@ -74,7 +102,6 @@ public class SimulationController {
         entityManager.clear();
 
         return ResponseEntity.ok("Rodada " + roundId + " simulada e pontuações distribuídas com sucesso!");
-
     }
 
     @GetMapping("/results")

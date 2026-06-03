@@ -34,6 +34,8 @@ public class FantasyTeam {
     private List<FantasyTeamPlayer> squad = new ArrayList<>();
 
     private Double cash = 100.0;
+
+    private Double totalPoints = 0.0;
     private Double teamValue;
 
 

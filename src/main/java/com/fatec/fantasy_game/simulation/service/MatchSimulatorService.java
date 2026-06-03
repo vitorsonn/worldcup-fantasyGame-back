@@ -36,8 +36,6 @@ public class MatchSimulatorService {
             match.getEvents().clear();
         }
 
-
-
         NationalTeam home = match.getHomeTeam();
         NationalTeam away = match.getAwayTeam();
 
@@ -60,6 +58,14 @@ public class MatchSimulatorService {
             processTeamEvents(savedMatch, away, awayGoals);
         }
 
+        int totalYellowCards = 2 + random.nextInt(5);
+        drawCards(savedMatch, totalYellowCards, EventType.YELLOW_CARD, random);
+
+        if(random.nextDouble() < 0.3) {
+            int totalRedCards = 1 + random.nextInt(2);
+            drawCards(savedMatch, totalRedCards, EventType.RED_CARD, random);
+        }
+
         System.out.println(String.format("SIMULAÇÃO: %s %d x %d %s",
                 home.getName(), homeGoals, awayGoals, away.getName()));
 
@@ -76,19 +82,44 @@ public class MatchSimulatorService {
             roll -= 10.0; // Dificulta fazer gols
         }
 
-        // Definimos os gols com base em faixas da rolagem
+
         if (roll > 90)
-            return 4; // 10% de chance de goleada
+            return 4;
         if (roll > 75)
-            return 3; // 15% de chance de 3 gols
+            return 3;
         if (roll > 45)
-            return 2; // 30% de chance de 2 gols
+            return 2;
         if (roll > 15)
-            return 1; // 30% de chance de 1 gol
+            return 1;
 
         return 0;
 
     }
+
+    private void drawCards(Match match, int quantity, EventType cardType, Random random) {
+     List<Player> allPlayers = playerRepository.findByTeamId(match.getHomeTeam().getId());
+     allPlayers.addAll(playerRepository.findByTeamId(match.getAwayTeam().getId()));
+
+     if(allPlayers.isEmpty()) return;
+
+     for (int i = 0; i < quantity; i++){
+         Player randomPlayer = allPlayers.get(random.nextInt(allPlayers.size()));
+
+         int minute = 1 + random.nextInt(90);
+
+         MatchEvent cardEvent = new MatchEvent();
+
+         cardEvent.setMatch(match);
+         cardEvent.setPlayer(randomPlayer);
+         cardEvent.setEventType(cardType);
+         cardEvent.setMinute(minute);
+
+         matchEventRepository.save(cardEvent);
+     }
+    }
+
+
+
 
     private void processTeamEvents(Match match, NationalTeam team, int goalsCount) {
         List<Player> players = playerRepository.findByTeamId(team.getId());

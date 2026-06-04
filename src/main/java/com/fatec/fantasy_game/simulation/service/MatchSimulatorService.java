@@ -1,11 +1,6 @@
 package com.fatec.fantasy_game.simulation.service;
 
-import com.fatec.fantasy_game.entities.EventType;
-import com.fatec.fantasy_game.entities.Match;
-import com.fatec.fantasy_game.entities.MatchEvent;
-import com.fatec.fantasy_game.entities.MatchStatus;
-import com.fatec.fantasy_game.entities.NationalTeam;
-import com.fatec.fantasy_game.entities.Player;
+import com.fatec.fantasy_game.entities.*;
 import com.fatec.fantasy_game.repositories.MatchEventRepository;
 import com.fatec.fantasy_game.repositories.MatchRepository;
 import com.fatec.fantasy_game.repositories.PlayerRepository;
@@ -58,6 +53,14 @@ public class MatchSimulatorService {
             processTeamEvents(savedMatch, away, awayGoals);
         }
 
+        if(homeGoals == 0){
+            processCleanSheet(savedMatch, home);
+        }
+
+        if(awayGoals == 0){
+            processCleanSheet(savedMatch, away);
+        }
+
         int totalYellowCards = 2 + random.nextInt(5);
         drawCards(savedMatch, totalYellowCards, EventType.YELLOW_CARD, random);
 
@@ -77,9 +80,9 @@ public class MatchSimulatorService {
         double roll = random.nextDouble() * 100.0;
 
         if (expectancy > 1.3) {
-            roll += 15.0; // Facilita fazer mais gols
+            roll += 15.0;
         } else if (expectancy < 0.8) {
-            roll -= 10.0; // Dificulta fazer gols
+            roll -= 10.0;
         }
 
 
@@ -118,6 +121,27 @@ public class MatchSimulatorService {
      }
     }
 
+    private void processCleanSheet(Match match, NationalTeam team) {
+        List<Player> players = playerRepository.findByTeamId(team.getId());
+
+        if (players.isEmpty()) return;
+
+        for (Player player : players) {
+            if (player.getPosition() == PlayerPosition.GOLEIRO ||
+                    player.getPosition() == PlayerPosition.ZAGUEIRO ||
+                    player.getPosition() == PlayerPosition.LATERAL) {
+
+                MatchEvent csEvent = new MatchEvent();
+                csEvent.setMatch(match);
+                csEvent.setPlayer(player);
+                csEvent.setEventType(EventType.CLEAN_SHEET);
+                csEvent.setMinute(90);
+
+                matchEventRepository.save(csEvent);
+            }
+        }
+    }
+
 
 
 
@@ -127,35 +151,67 @@ public class MatchSimulatorService {
         if (players.isEmpty())
             return;
 
-        for (int i = 0; i < goalsCount; i++) {
-            // Sorteia um jogador aleatório da equipe para ser o autor do gol
-            Player scorer = players.get(random.nextInt(players.size()));
+        if (match.getEvents() == null) {
+            match.setEvents(new java.util.ArrayList<>());
+        }
 
-            // Criando e salvando o Evento de Gol
+        for (int i = 0; i < goalsCount; i++) {
+            Player scorer = null;
+            boolean scorerDefined = false;
+
+                while (!scorerDefined) {
+                Player candidate = players.get(random.nextInt(players.size()));
+                PlayerPosition position = candidate.getPosition();
+                double roll = random.nextDouble();
+
+                if (roll > position.getGoalCutoff()) {
+                    scorer = candidate;
+                    scorerDefined = true;
+                }
+            }
+
             MatchEvent goalEvent = new MatchEvent();
             goalEvent.setMatch(match);
             goalEvent.setPlayer(scorer);
             goalEvent.setEventType(EventType.GOAL);
             goalEvent.setMinute(random.nextInt(90) + 1);
+
             matchEventRepository.save(goalEvent);
+            match.getEvents().add(goalEvent);
 
-            // 70% de chance de o gol ter tido uma assistência
-            if (random.nextDouble() < 0.70 && players.size() > 1) {
-                Player assistant;
-                // Garante que quem deu a assistência não seja o mesmo cara que fez o gol
-                do {
-                    assistant = players.get(random.nextInt(players.size()));
-                } while (assistant.getId().equals(scorer.getId()));
+            if (random.nextDouble() < 0.60 && players.size() > 1) {
+                Player assistant = null;
+                boolean assistantDefined = false;
+                int attempts = 0;
 
-                MatchEvent assistEvent = new MatchEvent();
-                assistEvent.setMatch(match);
-                assistEvent.setPlayer(assistant);
-                assistEvent.setEventType(EventType.ASSIST);
-                assistEvent.setMinute(goalEvent.getMinute()); // No mesmo minuto do gol
-                matchEventRepository.save(assistEvent);
+                while (!assistantDefined && attempts < 15) {
+                    attempts++;
+                    Player candidate = players.get(random.nextInt(players.size()));
+
+                    // O jogador não pode dar assistência para si mesmo
+                    if (candidate.getId().equals(scorer.getId())) {
+                        continue;
+                    }
+
+                    if (candidate.getPosition() == PlayerPosition.GOLEIRO && random.nextDouble() > 0.02 && attempts < 10) {
+                        continue;
+                    }
+
+                    assistant = candidate;
+                    assistantDefined = true;
+                }
+
+                if (assistantDefined) {
+                    MatchEvent assistEvent = new MatchEvent();
+                    assistEvent.setMatch(match);
+                    assistEvent.setPlayer(assistant);
+                    assistEvent.setEventType(EventType.ASSIST);
+                    assistEvent.setMinute(goalEvent.getMinute());
+
+                    matchEventRepository.save(assistEvent);
+                    match.getEvents().add(assistEvent);
+                }
             }
-
         }
-
     }
 }

@@ -1,10 +1,12 @@
 package com.fatec.fantasy_game.simulation.controller;
 
+import com.fatec.fantasy_game.entities.FantasyTeam;
 import com.fatec.fantasy_game.entities.FantasyTeamPlayer;
 import com.fatec.fantasy_game.entities.Match;
 import com.fatec.fantasy_game.entities.Player;
 import com.fatec.fantasy_game.repositories.*;
 import com.fatec.fantasy_game.simulation.dto.SquadPlayerDTO;
+import com.fatec.fantasy_game.simulation.dto.TeamRankingDTO;
 import com.fatec.fantasy_game.simulation.service.MarketService;
 import com.fatec.fantasy_game.simulation.service.ScoringService;
 import org.springframework.http.ResponseEntity;
@@ -71,30 +73,25 @@ public class MarketController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
-//
-//    @GetMapping("/{teamId}/roster")
-//    public List<SquadPlayerDTO> getMySquad(@PathVariable Long teamId, @RequestParam(defaultValue = "1") Long roundId) {
-//        List<FantasyTeamPlayer> squad = fantasyTeamPlayerRepository.findByFantasyTeamId(teamId);
-//
-//        return squad.stream().map(ftp -> {
-//            Double pontosTotais = scoringService.getAccumulatedPointsOfPlayerInTeam(
-//                    teamId,
-//                    ftp.getPlayer().getId(),
-//                    roundId
-//            );
-//
-//            return new SquadPlayerDTO(
-//                    ftp.getId(),
-//                    ftp.getPlayer().getPosition().toString(),
-//                    ftp.getPlayer().getName(),
-//                    ftp.getPlayer().getCurrentPrice(),
-//                    ftp.getRoundPoints() != null ? ftp.getRoundPoints() : 0.0,
-//                    pontosTotais
-//            );
-//        }).toList();
-//    }
 
+    @GetMapping("/leaderboard")
+    public ResponseEntity<List<TeamRankingDTO>> getLeaderboard() {
+        List<FantasyTeam> teams = fantasyTeamRepository.findAll();
+        List<TeamRankingDTO> ranking = new java.util.ArrayList<>();
 
+        for (FantasyTeam team : teams) {
+            Double totalPoints = fantasyTeamPlayerRepository.findByFantasyTeamId(team.getId())
+                    .stream()
+                    .mapToDouble(FantasyTeamPlayer::getRoundPoints)
+                    .sum();
+
+            ranking.add(new TeamRankingDTO(team.getName(), totalPoints, team.getCash()));
+        }
+
+        ranking.sort((a, b) -> b.getTotalPoints().compareTo(a.getTotalPoints()));
+
+        return ResponseEntity.ok(ranking);
+    }
 
 
 }

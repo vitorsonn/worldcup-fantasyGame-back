@@ -5,6 +5,7 @@ public enum EventType {
     ASSIST,
     YELLOW_CARD,
     RED_CARD,
-    OWN_GOAL
+    OWN_GOAL,
+    CLEAN_SHEET
 
 }

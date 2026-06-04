@@ -8,7 +8,7 @@ GOAL(8.0),
 ASSIST(5.0),
 RED_CARD(-5.0),
 YELLOW_CARD(-2.0),
-OWN_GOAL(-10.0);
+CLEAN_SHEET(4.0);
 
 private final Double value;
 

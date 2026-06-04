@@ -42,7 +42,8 @@ public class Match {
     @JoinColumn(name = "round_id", nullable = true)
     private Round round;
 
-    @OneToMany(mappedBy = "match", cascade = CascadeType.ALL, fetch = FetchType.LAZY)    
+    @OneToMany(mappedBy = "match", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OrderBy("minute ASC")
     private List<MatchEvent> events = new ArrayList<>();
 
 

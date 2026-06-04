@@ -70,14 +70,22 @@ public class SimulationController {
             return ResponseEntity.badRequest().body("Nenhuma partida encontrada para a rodada " + roundId);
         }
 
+        Round currentRound = roundRepository.findById(roundId)
+                .orElseThrow(() -> new RuntimeException("Rodada " + roundId + " não encontrada no banco!"));
+
+        if (currentRound.getSimulationCount() >= 3) {
+            return ResponseEntity.badRequest().body("A rodada " + roundId + " já foi simulada 3 vezes. Não é possível simular novamente.");
+        }
+
+        currentRound.setSimulationCount(currentRound.getSimulationCount() + 1);
+        roundRepository.save(currentRound);
+
         if (roundId > 1) {
             Long previousRoundId = roundId - 1;
             List<FantasyTeamPlayer> currentSquad = fantasyTeamPlayerRepository.findByRoundId(roundId);
 
             if (currentSquad.isEmpty()) {
                 List<FantasyTeamPlayer> previousSquad = fantasyTeamPlayerRepository.findByRoundId(previousRoundId);
-                Round currentRound = roundRepository.findById(roundId)
-                        .orElseThrow(() -> new RuntimeException("Rodada " + roundId + " não encontrada no banco!"));
 
                 for (FantasyTeamPlayer oldContract : previousSquad) {
                     FantasyTeamPlayer newContract = new FantasyTeamPlayer();
@@ -101,7 +109,7 @@ public class SimulationController {
         entityManager.flush();
         entityManager.clear();
 
-        return ResponseEntity.ok("Rodada " + roundId + " simulada e pontuações distribuídas com sucesso!");
+        return ResponseEntity.ok("Rodada " + roundId + " simulada com sucesso! (Tentativa " + currentRound.getSimulationCount() + "/3)");
     }
 
     @GetMapping("/results")

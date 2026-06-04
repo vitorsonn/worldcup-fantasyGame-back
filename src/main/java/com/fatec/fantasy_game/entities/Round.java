@@ -20,5 +20,8 @@ public class Round {
     private Long matchId;
     private Integer roundNumber;
 
+    @Column(name = "simulation_count", nullable = false)
+    private int simulationCount = 0;
+
 
 }

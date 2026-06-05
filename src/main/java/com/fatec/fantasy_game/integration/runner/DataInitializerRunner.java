@@ -58,7 +58,7 @@ public class DataInitializerRunner implements CommandLineRunner {
             FantasyTeam meuTime = new FantasyTeam();
             meuTime.setName("Vitor FC");
             meuTime.setOwner(savedUser);
-            meuTime.setCash(120.0);
+            meuTime.setCash(150.0);
             fantasyTeamRepository.save(meuTime);
 
             Round rodada1 = new Round();

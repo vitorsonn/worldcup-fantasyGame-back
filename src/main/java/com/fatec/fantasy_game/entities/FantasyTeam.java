@@ -38,6 +38,9 @@ public class FantasyTeam {
     private Double totalPoints = 0.0;
     private Double teamValue;
 
+    @Enumerated(EnumType.STRING)
+    private Formation formation = Formation.F_433;
+
 
 
 }

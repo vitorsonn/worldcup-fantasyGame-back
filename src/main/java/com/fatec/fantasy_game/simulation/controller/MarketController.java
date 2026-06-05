@@ -1,9 +1,6 @@
 package com.fatec.fantasy_game.simulation.controller;
 
-import com.fatec.fantasy_game.entities.FantasyTeam;
-import com.fatec.fantasy_game.entities.FantasyTeamPlayer;
-import com.fatec.fantasy_game.entities.Match;
-import com.fatec.fantasy_game.entities.Player;
+import com.fatec.fantasy_game.entities.*;
 import com.fatec.fantasy_game.repositories.*;
 import com.fatec.fantasy_game.simulation.dto.SquadPlayerDTO;
 import com.fatec.fantasy_game.simulation.dto.TeamRankingDTO;
@@ -91,6 +88,19 @@ public class MarketController {
         ranking.sort((a, b) -> b.getTotalPoints().compareTo(a.getTotalPoints()));
 
         return ResponseEntity.ok(ranking);
+    }
+
+    @PutMapping("/teams/{teamId}/formation")
+    public ResponseEntity<?> updateFormation(
+            @PathVariable Long teamId,
+            @RequestParam("formation") Formation newFormation,
+            @RequestParam("roundId") Long roundId) {
+        try {
+            FantasyTeam updatedTeam = marketService.changeTeamFormation(teamId, newFormation, roundId);
+            return ResponseEntity.ok(updatedTeam);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
 

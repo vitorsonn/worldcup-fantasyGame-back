@@ -1,6 +1,9 @@
 package com.fatec.fantasy_game.simulation.service;
 
 import com.fatec.fantasy_game.entities.*;
+import com.fatec.fantasy_game.enums.EventType;
+import com.fatec.fantasy_game.enums.MatchStatus;
+import com.fatec.fantasy_game.enums.PlayerPosition;
 import com.fatec.fantasy_game.repositories.MatchEventRepository;
 import com.fatec.fantasy_game.repositories.MatchRepository;
 import com.fatec.fantasy_game.repositories.PlayerRepository;

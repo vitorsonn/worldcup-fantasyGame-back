@@ -1,4 +1,4 @@
-package com.fatec.fantasy_game.entities;
+package com.fatec.fantasy_game.enums;
 
 public enum Formation {
     F_433("4-3-3", 4, 3, 3),

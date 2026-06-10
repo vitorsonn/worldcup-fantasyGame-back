@@ -1,5 +1,6 @@
 package com.fatec.fantasy_game.entities;
 
+import com.fatec.fantasy_game.enums.Formation;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

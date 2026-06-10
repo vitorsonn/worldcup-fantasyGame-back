@@ -1,4 +1,4 @@
-package com.fatec.fantasy_game.entities;
+package com.fatec.fantasy_game.enums;
 
 public enum MatchStatus {
     AGENDADA,

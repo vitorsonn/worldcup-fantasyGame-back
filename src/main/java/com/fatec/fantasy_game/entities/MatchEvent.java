@@ -2,6 +2,7 @@ package com.fatec.fantasy_game.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fatec.fantasy_game.enums.EventType;
 import jakarta.persistence.*;
 import lombok.*;
 

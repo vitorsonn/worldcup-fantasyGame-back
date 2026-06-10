@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.fatec.fantasy_game.entities.*;
+import com.fatec.fantasy_game.enums.EventType;
+import com.fatec.fantasy_game.enums.Score;
 import com.fatec.fantasy_game.repositories.FantasyTeamRepository;
 import org.springframework.stereotype.Service;
 import com.fatec.fantasy_game.repositories.FantasyTeamPlayerRepository;

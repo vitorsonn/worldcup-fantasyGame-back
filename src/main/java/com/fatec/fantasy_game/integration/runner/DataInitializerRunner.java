@@ -2,10 +2,10 @@ package com.fatec.fantasy_game.integration.runner;
 
 import com.fatec.fantasy_game.entities.FantasyTeam;
 import com.fatec.fantasy_game.entities.Match;
-import com.fatec.fantasy_game.entities.MatchStatus;
+import com.fatec.fantasy_game.enums.MatchStatus;
 import com.fatec.fantasy_game.entities.NationalTeam;
 import com.fatec.fantasy_game.entities.Player;
-import com.fatec.fantasy_game.entities.PlayerPosition;
+import com.fatec.fantasy_game.enums.PlayerPosition;
 import com.fatec.fantasy_game.entities.Round;
 import com.fatec.fantasy_game.entities.User;
 import com.fatec.fantasy_game.integration.service.ApiClient;

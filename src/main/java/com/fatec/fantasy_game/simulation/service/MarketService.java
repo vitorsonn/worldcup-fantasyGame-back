@@ -1,6 +1,9 @@
 package com.fatec.fantasy_game.simulation.service;
 
 import com.fatec.fantasy_game.entities.*;
+import com.fatec.fantasy_game.enums.Formation;
+import com.fatec.fantasy_game.enums.PlayerPosition;
+import com.fatec.fantasy_game.simulation.dto.TeamRankingDTO;
 import org.springframework.stereotype.Service;
 import com.fatec.fantasy_game.repositories.FantasyTeamPlayerRepository;
 import com.fatec.fantasy_game.repositories.FantasyTeamRepository;
@@ -9,7 +12,9 @@ import com.fatec.fantasy_game.repositories.RoundRepository;
 
 import jakarta.transaction.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class MarketService {
@@ -27,6 +32,35 @@ public class MarketService {
         this.squadRepository = squadRepository;
         this.playerRepository = playerRepository;
         this.roundRepository = roundRepository;
+    }
+
+    public List<Player> getAllPlayers() {
+        return playerRepository.findAll();
+    }
+
+    public List<FantasyTeamPlayer> getSquadByTeamAndRound(Long teamId, Long roundId) {
+        return squadRepository.findByFantasyTeamIdAndRoundId(teamId, roundId);
+    }
+
+    public Optional<FantasyTeam> getTeamById(Long teamId) {
+        return teamRepository.findById(teamId);
+    }
+
+    public List<TeamRankingDTO> getLeaderboard() {
+        List<FantasyTeam> teams = teamRepository.findAll();
+        List<TeamRankingDTO> ranking = new ArrayList<>();
+
+        for (FantasyTeam team : teams) {
+            Double totalPoints = squadRepository.findByFantasyTeamId(team.getId())
+                    .stream()
+                    .mapToDouble(FantasyTeamPlayer::getRoundPoints)
+                    .sum();
+
+            ranking.add(new TeamRankingDTO(team.getName(), totalPoints, team.getCash()));
+        }
+
+        ranking.sort((a, b) -> b.getTotalPoints().compareTo(a.getTotalPoints()));
+        return ranking;
     }
 
     @Transactional

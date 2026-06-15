@@ -1,16 +1,20 @@
 package com.fatec.fantasy_game.simulation.controller;
 
-import com.fatec.fantasy_game.entities.FantasyTeam;
-import com.fatec.fantasy_game.entities.FantasyTeamPlayer;
 import com.fatec.fantasy_game.enums.Formation;
-import com.fatec.fantasy_game.entities.Player;
+import com.fatec.fantasy_game.simulation.dto.FantasyTeamDTO;
+import com.fatec.fantasy_game.simulation.dto.FantasyTeamPlayerDTO;
+import com.fatec.fantasy_game.simulation.dto.PlayerDTO;
 import com.fatec.fantasy_game.simulation.dto.TeamRankingDTO;
+import com.fatec.fantasy_game.simulation.mapper.FantasyTeamMapper;
+import com.fatec.fantasy_game.simulation.mapper.FantasyTeamPlayerMapper;
+import com.fatec.fantasy_game.simulation.mapper.PlayerMapper;
 import com.fatec.fantasy_game.simulation.service.MarketService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/market")
@@ -25,28 +29,33 @@ public class MarketController {
             @RequestParam Long playerId,
             @RequestParam Long roundId) {
         try {
-            FantasyTeamPlayer contract = marketService.buyPlayer(teamId, playerId, roundId);
-            return ResponseEntity.ok(contract);
+            return ResponseEntity.ok(FantasyTeamPlayerMapper.toDTO(marketService.buyPlayer(teamId, playerId, roundId)));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
     @GetMapping("/players")
-    public List<Player> getAllPlayers() {
-        return marketService.getAllPlayers();
+    public List<PlayerDTO> getAllPlayers() {
+        return marketService.getAllPlayers().stream()
+                .map(PlayerMapper::toDTO)
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/{teamId}/roster")
-    public ResponseEntity<List<FantasyTeamPlayer>> getMySquad(
+    public ResponseEntity<List<FantasyTeamPlayerDTO>> getMySquad(
             @PathVariable("teamId") Long teamId,
             @RequestParam("roundId") Long roundId) {
-        return ResponseEntity.ok(marketService.getSquadByTeamAndRound(teamId, roundId));
+        List<FantasyTeamPlayerDTO> squad = marketService.getSquadByTeamAndRound(teamId, roundId).stream()
+                .map(FantasyTeamPlayerMapper::toDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(squad);
     }
 
     @GetMapping("/team/{teamId}")
     public ResponseEntity<?> getTeamInfo(@PathVariable Long teamId) {
         return marketService.getTeamById(teamId)
+                .map(FantasyTeamMapper::toDTO)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -62,8 +71,7 @@ public class MarketController {
             @RequestParam("formation") Formation newFormation,
             @RequestParam("roundId") Long roundId) {
         try {
-            FantasyTeam updatedTeam = marketService.changeTeamFormation(teamId, newFormation, roundId);
-            return ResponseEntity.ok(updatedTeam);
+            return ResponseEntity.ok(FantasyTeamMapper.toDTO(marketService.changeTeamFormation(teamId, newFormation, roundId)));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

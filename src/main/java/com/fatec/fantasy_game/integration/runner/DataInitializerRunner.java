@@ -104,46 +104,74 @@ public class DataInitializerRunner implements CommandLineRunner {
                     List<NationalTeam> selecoes = nationalTeamRepository.findAll();
 
                     if (selecoes.size() >= 16) {
+                        System.out.println("Agendando partidas clássicas personalizadas...");
 
                         for (int roundNum = 1; roundNum <= 5; roundNum++) {
                             final int currentRoundNumber = roundNum;
-
-                            Round currentRound = roundRepository.findByRoundNumber(currentRoundNumber)
+                            roundRepository.findByRoundNumber(currentRoundNumber)
                                     .orElseGet(() -> {
                                         Round newRound = new Round();
                                         newRound.setRoundNumber(currentRoundNumber);
+                                        newRound.setSimulationCount(0);
                                         return roundRepository.save(newRound);
                                     });
-
-                            System.out.println("Gerando confrontos para a Rodada " + roundNum + "...");
-
-                            for (int jogo = 0; jogo < 8; jogo++) {
-                                int homeIdx = (jogo + roundNum) % selecoes.size();
-                                int awayIdx = (selecoes.size() - 1 - jogo + roundNum) % selecoes.size();
-
-                                if (homeIdx == awayIdx) {
-                                    awayIdx = (awayIdx + 1) % selecoes.size();
-                                }
-
-                                Match partida = new Match();
-                                partida.setHomeTeam(selecoes.get(homeIdx));
-                                partida.setAwayTeam(selecoes.get(awayIdx));
-                                partida.setRound(currentRound);
-                                partida.setStatus(MatchStatus.AGENDADA);
-                                partida.setHomeGoals(0);
-                                partida.setAwayGoals(0);
-
-                                matchRepository.save(partida);
-                            }
                         }
-                        System.out.println("⚽ Calendário completo de 5 rodadas com 8 jogos cada agendado com sucesso!");
+
+                        Round r1 = roundRepository.findByRoundNumber(1).orElseThrow();
+                        criarJogoManual("Brazil", "Spain", r1);
+                        criarJogoManual("Germany", "Argentina", r1);
+                        criarJogoManual("Portugal", "Netherlands", r1);
+                        criarJogoManual("Uruguay", "France", r1);
+                        criarJogoManual("England", "Australia", r1);
+                        criarJogoManual("Belgium", "Croatia", r1);
+                        criarJogoManual("Morocco", "Japan", r1);
+                        criarJogoManual("United States", "Mexico", r1);
+
+                        Round r2 = roundRepository.findByRoundNumber(2).orElseThrow();
+                        criarJogoManual("Brazil", "Germany", r2);
+                        criarJogoManual("Spain", "Portugal", r2);
+                        criarJogoManual("Argentina", "France", r2);
+                        criarJogoManual("Netherlands", "Uruguay", r2);
+                        criarJogoManual("Australia", "Belgium", r2);
+                        criarJogoManual("Croatia", "England", r2);
+                        criarJogoManual("Japan", "United States", r2);
+                        criarJogoManual("Mexico", "Morocco", r2);
+
+                        Round r3 = roundRepository.findByRoundNumber(3).orElseThrow();
+                        criarJogoManual("Brazil", "Argentina", r3);
+                        criarJogoManual("Germany", "France", r3);
+                        criarJogoManual("Spain", "Netherlands", r3);
+                        criarJogoManual("Portugal", "Uruguay", r3);
+                        criarJogoManual("England", "Belgium", r3);
+                        criarJogoManual("Australia", "Croatia", r3);
+                        criarJogoManual("Morocco", "United States", r3);
+                        criarJogoManual("Mexico", "Japan", r3);
+
+                        Round r4 = roundRepository.findByRoundNumber(4).orElseThrow();
+                        criarJogoManual("Brazil", "France", r4);
+                        criarJogoManual("Germany", "Portugal", r4);
+                        criarJogoManual("Argentina", "Spain", r4);
+                        criarJogoManual("Netherlands", "England", r4);
+                        criarJogoManual("Uruguay", "Australia", r4);
+                        criarJogoManual("Belgium", "Japan", r4);
+                        criarJogoManual("Croatia", "Mexico", r4);
+                        criarJogoManual("United States", "Morocco", r4);
+
+                        Round r5 = roundRepository.findByRoundNumber(5).orElseThrow();
+                        criarJogoManual("Brazil", "Portugal", r5);
+                        criarJogoManual("Argentina", "Germany", r5);
+                        criarJogoManual("Spain", "France", r5);
+                        criarJogoManual("Netherlands", "Australia", r5);
+                        criarJogoManual("Uruguay", "England", r5);
+                        criarJogoManual("Belgium", "Morocco", r5);
+                        criarJogoManual("Croatia", "Japan", r5);
+                        criarJogoManual("Mexico", "United States", r5);
+
+                        System.out.println("⚽ Calendário ÉPICO de 5 rodadas agendado com sucesso!");
 
                     } else {
-                        System.out.println("Aviso: É necessário ter pelo menos 16 seleções vindas da API para fechar 8 jogos por rodada.");
+                        System.out.println("Aviso: A API retornou menos de 16 seleções (" + selecoes.size() + "). O agendamento manual foi cancelado.");
                     }
-
-
-
 
                 }
             } catch (Exception e) {
@@ -162,6 +190,24 @@ public class DataInitializerRunner implements CommandLineRunner {
             case "midfield" -> PlayerPosition.MEIA;
             default -> PlayerPosition.ATACANTE;
         };
+    }
+
+    private void criarJogoManual(String homeName, String awayName, Round round) {
+        NationalTeam home = nationalTeamRepository.findByNameIgnoreCase(homeName)
+                .orElseThrow(() -> new RuntimeException("Seleção não encontrada: " + homeName));
+
+        NationalTeam away = nationalTeamRepository.findByNameIgnoreCase(awayName)
+                .orElseThrow(() -> new RuntimeException("Seleção não encontrada: " + awayName));
+
+        Match partida = new Match();
+        partida.setHomeTeam(home);
+        partida.setAwayTeam(away);
+        partida.setRound(round);
+        partida.setStatus(MatchStatus.AGENDADA);
+        partida.setHomeGoals(0);
+        partida.setAwayGoals(0);
+
+        matchRepository.save(partida);
     }
 
 }

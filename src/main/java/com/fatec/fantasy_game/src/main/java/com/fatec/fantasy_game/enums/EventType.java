@@ -1,0 +1,11 @@
+package com.fatec.fantasy_game.enums;
+
+public enum EventType {
+    GOAL,
+    ASSIST,
+    YELLOW_CARD,
+    RED_CARD,
+    OWN_GOAL,
+    CLEAN_SHEET
+
+}

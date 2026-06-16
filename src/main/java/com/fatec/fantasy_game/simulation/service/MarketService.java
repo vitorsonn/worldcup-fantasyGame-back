@@ -110,24 +110,20 @@ public class MarketService {
 
     @Transactional
     public FantasyTeam changeTeamFormation(Long teamId, Formation newFormation, Long roundId) {
-        // 1. Busca o time no banco
         FantasyTeam team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new RuntimeException("Time não encontrado!"));
 
-        // 2. Busca o elenco escalado pelo usuário para a rodada atual
         List<FantasyTeamPlayer> currentSquad = squadRepository.findByFantasyTeamIdAndRoundId(teamId, roundId);
 
-        // 3. Valida se o elenco atual cabe dentro das regras da nova formação
         for (PlayerPosition position : PlayerPosition.values()) {
             // Conta quantos jogadores o usuário já tem nessa posição
             long currentCount = currentSquad.stream()
                     .filter(contract -> contract.getPlayer().getPosition() == position)
                     .count();
 
-            // Pega o limite que a NOVA formação desejada impõe
             int maxAllowedByNewFormation = newFormation.getLimitByPosition(position);
 
-            // Se ele já tiver mais jogadores comprados do que a nova formação permite, bloqueia!
+            // Se ele já tiver mais jogadores comprados do que a nova formação permite, block
             if (currentCount > maxAllowedByNewFormation) {
                 throw new RuntimeException("Não é possível mudar para " + newFormation.getLabel() +
                         "! Você já possui " + currentCount + " jogador(es) da posição " + position +
@@ -135,9 +131,37 @@ public class MarketService {
             }
         }
 
-        // 4. Se passou na validação, atualiza a formação do time e salva
         team.setFormation(newFormation);
         return teamRepository.save(team);
+    }
+
+    @Transactional
+    public void sellPlayer(Long teamId, Long playerId, Long roundId) {
+
+        Round round = roundRepository.findById(roundId)
+                .orElseThrow(() -> new RuntimeException("Rodada não encontrada!"));
+
+        if (round.getSimulationCount() > 0) {
+            throw new RuntimeException("Mercado fechado! Não é possível alterar o elenco de uma rodada já simulada.");
+        }
+
+
+        FantasyTeamPlayer contract = squadRepository.findByFantasyTeamIdAndPlayerIdAndRoundId(teamId, playerId, roundId)
+                .orElseThrow(() -> new RuntimeException("Contrato do jogador não encontrado no seu time para esta rodada!"));
+
+
+        FantasyTeam team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new RuntimeException("Time não encontrado!"));
+
+
+        Player player = contract.getPlayer();
+        team.setCash(team.getCash() + player.getCurrentPrice());
+
+
+        squadRepository.delete(contract);
+        teamRepository.save(team);
+
+        System.out.println("💰 Jogador " + player.getName() + " vendido. Saldo atualizado para: " + team.getCash());
     }
 
 }

@@ -4,6 +4,7 @@ import com.fatec.fantasy_game.simulation.dto.MatchDTO;
 import com.fatec.fantasy_game.simulation.mapper.MatchMapper;
 import com.fatec.fantasy_game.simulation.service.SimulationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,6 +16,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class SimulationController {
 
+    @Autowired
     private final SimulationService simulationService;
 
     @GetMapping("/quick-match")

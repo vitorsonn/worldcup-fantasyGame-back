@@ -10,6 +10,7 @@ import com.fatec.fantasy_game.simulation.mapper.FantasyTeamPlayerMapper;
 import com.fatec.fantasy_game.simulation.mapper.PlayerMapper;
 import com.fatec.fantasy_game.simulation.service.MarketService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class MarketController {
 
+    @Autowired
     private final MarketService marketService;
 
     @PostMapping("/buy")
@@ -72,6 +74,20 @@ public class MarketController {
             @RequestParam("roundId") Long roundId) {
         try {
             return ResponseEntity.ok(FantasyTeamMapper.toDTO(marketService.changeTeamFormation(teamId, newFormation, roundId)));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+
+    @DeleteMapping("/teams/{teamId}/sell-player")
+    public ResponseEntity<?> sellPlayer(
+            @PathVariable Long teamId,
+            @RequestParam("playerId") Long playerId,
+            @RequestParam("roundId") Long roundId) {
+        try {
+            marketService.sellPlayer(teamId, playerId, roundId);
+            return ResponseEntity.ok("Jogador removido do elenco e saldo estornado!");
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
